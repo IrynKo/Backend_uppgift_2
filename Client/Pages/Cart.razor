@@ -1,0 +1,74 @@
+﻿@page "/cart"
+@inject ICartService CartService
+
+<div class="cart container">
+    @if (!orderPlased)
+    {
+        <h3>Shopping Cart</h3>
+    @if (cartItems == null || cartItems.Count <= 0)
+    {
+        <span>You have no items in your cart.</span>
+    }
+    else
+    {
+        <ul>
+
+            @foreach (var item in cartItems)
+            {
+                <li class="item-container">
+                    <div class="item-image-wrapper"><img src="@item.Image" class="item-image" /></div>
+                    <div class="item-name">
+                        <h5><a href="/product/@item.ProductId">@item.Title</a></h5>
+                        <p class="item-price mb-2"> £ @(item.Price * item.Quantity)</p>
+                        <EditForm Model="item" style="width: 10%;">
+                            <InputNumber id="quantity" @bind-Value="item.Quantity" class="form-control mb-2" />
+                        </EditForm>
+                      
+                        <button class="btn-delete" @onclick="@(() => DeleteItem(item))">Delete</button>
+                    </div>
+
+                </li>
+            }
+        </ul>
+    }
+
+
+        <p class="cart-price">
+            Total (@cartItems.Count):$@cartItems.Sum(item => (item.Quantity*item.Price))
+        </p>
+        <button class=" cart-btn" @onclick="PlaceOrder">Place Order</button>
+   }
+    else
+            {
+<h3> Thanks for your order!</h3>
+            }
+</div>
+
+
+
+@code {
+    private Order order = new();
+    List<CartItem> cartItems = new List<CartItem>();
+    bool orderPlased = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cartItems = await CartService.GetCartItems();
+    }
+    private async Task DeleteItem(CartItem item)
+    {
+        await CartService.DeleteItem(item);
+        cartItems = await CartService.GetCartItems();
+    }
+
+    private async Task PlaceOrder()
+    {
+        await Http.PostAsJsonAsync("https://localhost:44310/api/Orders", cartItems);
+        order = new();
+
+        StateHasChanged();
+    
+        orderPlased = true;
+        await CartService.EmptyCart();
+    }
+}

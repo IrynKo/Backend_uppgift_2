@@ -1,0 +1,44 @@
+﻿@page "/orders"
+@inject HttpClient Http
+
+
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<div class="orders-title mb-b">
+    <span  class="orders-title__num">Order number</span>
+    <span class="orders-title__date">Date</span>
+    <span class="orders-title__total">Total(£)</span>
+</div>
+<div >
+    @foreach (var order in orders)
+    
+        {
+
+
+        <div class="orders-info">
+            <span class="orders-info__num">@order.Id</span>
+            <span class="orders-info__date">@order.DateCreated.Value.ToString("dd MMM yyyy") </span>
+            <span class="orders-info__total"> @order.Amount.ToString().Remove(order.Amount.ToString().Length-2) </span>
+        </div>
+        
+        }
+   
+</div>
+
+        }
+
+        @code {
+    private Order[] orders;
+
+        protected override async Task OnInitializedAsync()
+        {
+            orders = await Http.GetFromJsonAsync<Order[]>("https://localhost:44310/api/Orders");
+        }
+
+        }
+

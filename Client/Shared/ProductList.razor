@@ -1,0 +1,62 @@
+﻿@implements IDisposable
+
+<div class="container">
+    @if (products == null)
+    {
+        <p>Loading products</p>
+    }
+    else
+    {
+        <ul class="product-list">
+            @foreach (var product in products)
+            {
+                <li class="card mr-4" style="width: 18rem;">
+                    <a href="/product/@product.Id">
+                        <img class="card-img-top" src="@product.Image" alt="@product.Title" style="max-height: 300px;">
+                    </a>
+                    <div class="card-body">
+                        <a class="card-title" href="/product/@product.Id">
+                            <h5>@product.Title</h5>
+                        </a>
+                        <p class="card-text">@product.Description</p>
+                        <span class="price">£ @product.Price</span>
+
+                    </div>
+                </li>
+
+
+            }
+        </ul>
+    }
+</div>
+
+
+@code {
+    public List<Product> products { get; set; } = new List<Product>();
+    public event Action OnChange;
+
+
+    public async Task GetProductsAsync()
+    {
+
+        products = await Http.GetFromJsonAsync<List<Product>>("https://localhost:44310/api/Products");
+
+        //OnChange.Invoke();
+
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProductsAsync();
+        //OnChange += StateHasChanged;
+
+        //var timer = new Timer(new TimerCallback(_ => InvokeAsync(() => StateHasChanged())), null, 1000, 1000);
+    }
+    public void Dispose()
+    {
+        OnChange -= StateHasChanged;
+    }
+
+   
+
+
+}

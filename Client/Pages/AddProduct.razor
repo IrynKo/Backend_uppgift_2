@@ -1,0 +1,62 @@
+﻿@inject IToastService ToastService
+@page "/adding"
+
+<p class="add-product">Create a new product</p>
+<EditForm Model="@product" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label for="description" class="form-label">Product Name</label>
+        <InputText id="name" class="form-control" @bind-Value="product.Title" />
+        <ValidationMessage  style="color:red;" For="@(() => product.Title)"  /> 
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="product.Description" />
+        <ValidationMessage For="@(() => product.Description)"  style="color:red;" />
+    </div>
+    <div class="mb-3">
+        <label for="imageUrl" class="form-label">Image</label>
+        <InputTextArea id="image" class="form-control" @bind-Value="product.Image" />
+        <ValidationMessage For="@(() => product.Image)" style="color:red;" />
+    </div>
+    <div class="mb-3">
+        <label for="price" class="form-label">Price</label>
+        <InputNumber id="price" class="form-control" @bind-Value="product.Price" />
+        <ValidationMessage  style="color:red;" For="@(() => product.Price)" />
+    </div>
+    <div class="mb-5">
+        <button class="btn btn-secondary" type="submit">Add New Product</button>
+    </div>
+</EditForm>
+
+
+@code {
+    private Product product = new();
+
+    private async Task HandleValidSubmit()
+    {
+        var res = await Http.PostAsJsonAsync("https://localhost:44310/api/Products", product);
+        product = new();
+
+        StateHasChanged();
+        if (res.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(product.Title, "This product added to product list");
+        }
+        // Console.WriteLine("OnValidSubmit");
+        /* if (res.IsSuccessStatusCode)
+         {
+             product = new();
+
+             StateHasChanged();
+
+             ToastService.ShowSuccess(product.Title, "This product added to cart");
+         } else
+         {
+             var content = await res.Content.ReadAsStringAsync();
+             Console.WriteLine("OnValidSubmit");
+             ToastService.ShowError(content, "Error");
+         }*/
+    }
+
+}

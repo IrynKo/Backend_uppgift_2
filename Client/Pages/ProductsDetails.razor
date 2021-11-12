@@ -1,0 +1,64 @@
+﻿@page "/product/{id}"
+@inject ILocalStorageService LocalStorage
+@inject IToastService ToastService
+@inject ICartService CartService
+
+
+
+
+<div class="d-flex product-details">
+    <div class="media-img-big-wrapper ">
+        <img class="media-img-big mr-3" src="@product.Image" alt="@product.Title" />
+    </div>
+    <div class="media-body">
+        <h2 class="mb-4">@product.Title</h2>
+        <p  class="mb-2">@product.Description</p>
+        <p  class="item-price mb-2">£@product.Price</p>
+        <EditForm Model="cartItem" style="width: 80%;" >
+            <div class="form-group">
+                <InputNumber id="quantity" @bind-Value="cartItem.Quantity" class="form-control" />
+            </div>
+
+        </EditForm>
+        <button class="btn btn-primary mt-3" @onclick="AddToCard">Add to Cart</button>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+@code {
+    private Product product = new Product();
+
+    private CartItem cartItem = new CartItem { Quantity = 1 };
+
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        product = await Http.GetFromJsonAsync<Product>($"https://localhost:44310/api/Products/{Id}");
+
+    }
+
+
+    private async Task AddToCard()
+
+    {
+        cartItem.Title = product.Title;
+        cartItem.Image = product.Image;
+        cartItem.Price = product.Price;
+        cartItem.ProductId = product.Id;
+        
+
+        await CartService.AddToCart(cartItem, product);
+       
+    }
+
+}
